@@ -1,0 +1,24 @@
+<package format="2">
+  <name>ai_wheel_driver</name>
+  <version>0.1.2</version>
+  <description>
+    This package is an AI based deep learning motor driver.
+    It subscribes to /cmd_vel and /odometry and publishes to motor_current.
+    Using this package your robot will be able to learn how to driver your
+    motors to approach the linear and angular velocity read from cmd_vel.
+
+
+  </description>
+  <author>Zsolt Egri</author>
+  <maintainer email="egri.zsolt@gmail.com">Zsolt Egri</maintainer>
+  <license>GNU 3</license>
+  <url>https://github.com/ezsolt23/ai-motor-driver</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+
+</package>
