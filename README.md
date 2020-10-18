@@ -1,4 +1,8 @@
 # ai-motor-driver
+The goal of this project is to create anextra layer between the cmd_vel ROS topic and the wheel driver.
+The aim of theis layer is to be an AI based wheel driver. This way you don't need to fine tune the
+wheel driver, and then re-tune to different surfaces like carpet, wood floor or ourside terrain, but
+it can learn by itself how to move the wheels the best way.
 
 # Requirements
 
