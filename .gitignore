@@ -1,3 +1,4 @@
+*.pyc
 *.swp
 *.swo
 bin
@@ -9,3 +10,4 @@ cfg/cpp
 src/node_example
 site
 src/venv
+*/__pycache__
