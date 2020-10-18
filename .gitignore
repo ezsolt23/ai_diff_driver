@@ -1,4 +1,4 @@
-*.pyc
+#*.pyc
 *.swp
 *.swo
 bin
@@ -10,4 +10,5 @@ cfg/cpp
 src/node_example
 site
 src/venv
-*/__pycache__
+#*/__pycache__
+Pipfile.lock
