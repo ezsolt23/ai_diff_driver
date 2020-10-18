@@ -30,3 +30,10 @@ You need to run two nodes. One is a very basic driver to ODrive which sends velo
 the messages recoeved from **cmd_wheel_current_l** and **cmd_wheel_current_r** ROS topics. The two topics are fed by 
 the other node, ai_driver_node, which you can start with start_ai_node.sh. You can re implement the odrive_node to
 match your specific wheel. It should be refactored to an external repository, but now it is good here I think.
+
+# Special Thanks
+
+I have written this project as an honor to my father Zoltán Egri. We started our first robot project together back in 2002
+and he was alway a great colleague, excellent problem solver and a loving father. Unfortunately he passed away in May 04 2020
+so he could never see the finished project. I have written and open sourced this project as a honor to my loving father. 
+I love you dad! Rest in peace!
