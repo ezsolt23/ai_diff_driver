@@ -1,5 +1,5 @@
 <package format="2">
-  <name>ai_wheel_driver</name>
+  <name>ai_diff_driver</name>
   <version>0.1.2</version>
   <description>
     This package is an AI based deep learning motor driver.

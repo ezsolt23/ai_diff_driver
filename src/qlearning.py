@@ -27,6 +27,8 @@ class RobotEnv(rl.core.Env):
     linear_diff = 0
     angular_diff = 0
     time_penalty = 0
+    steps = 0
+    sum_reward = 0.0
 
     def __init__(self, ros_node):
         self.ros_node = ros_node
@@ -35,7 +37,7 @@ class RobotEnv(rl.core.Env):
         self.reset()
         self.calcReward()
 
-        rospy.Timer(rospy.Duration(1.0), self.printDebugInfos)
+        #rospy.Timer(rospy.Duration(1.0), self.printDebugInfos)
 
     def step(self, action):
         """Run one timestep of the environment's dynamics.
@@ -49,15 +51,16 @@ class RobotEnv(rl.core.Env):
             info (dict): Contains auxiliary diagnostic information (helpful for debugging, and sometimes learning).
         """
 
+        self.steps +=1
         self.sendWheelsCurrent(action)
-        self.rate.sleep()
+        #self.rate.sleep()
         done = False
-        if timeit.default_timer()-self.start_time > 10:
+        if self.steps == 50:
             done = True
 
         self.time_penalty -= 0.001
         reward = self.getReward()
-        
+        self.sum_reward += reward
 
         observation = self.getObservation()
         info = {}
@@ -70,13 +73,16 @@ class RobotEnv(rl.core.Env):
         # Returns/home/ezsolt/.ros/rtabmap.db
             observation (object): The initial observation of the space. Initial reward is assumed to be 0.
         """
+        rospy.loginfo("          ----------           RESET   %.2f", self.sum_reward)
+
+        self.sum_reward = 0
         self.reward = 0
+        self.steps = 0
         self.time_penalty = 0
         self.current_left = 0
         self.current_right = 0
         self.sendWheelsCurrent(0)
-        time.sleep(2)
-        rospy.loginfo("          ----------           RESET")
+        #time.sleep(2)
         self.start_time=timeit.default_timer()
 
         # Set up new random target speed
@@ -90,7 +96,7 @@ class RobotEnv(rl.core.Env):
             self.target_z = 0.0
 
         observation = self.getObservation()
-        self.getReward()
+        reward = self.getReward()
         return observation
 
     def getReward(self):
@@ -99,14 +105,14 @@ class RobotEnv(rl.core.Env):
         return reward
 
     def getObservation(self):
-        while self.ros_node.last_odom == None:
+        while not self.ros_node.ready():
             print("Res: ", self.scale(-1,0,-1.5))
 
             rospy.loginfo("Waiting for odom to become available..")
             time.sleep(1)    
         data =  [
-            self.scale(-1, 1, self.ros_node.last_odom.linear.x), 
-            self.scale(-1, 1, self.ros_node.last_odom.angular.z),
+            self.scale(-1, 1, self.ros_node.getLinearSpeed()),  #last_odom.linear.x), 
+            self.scale(-1, 1, self.ros_node.getAngularSpeed()), #last_odom.angular.z),
             self.scale(-1, 1, self.target_x),
             self.scale(-1, 1, self.target_z),
             self.scale(-5, 5, self.ros_node.wheel_current_l),
@@ -116,11 +122,12 @@ class RobotEnv(rl.core.Env):
         return state
 
     def calcReward(self):
-        if self.ros_node.last_odom == None: #or self.last_vel == None:
+        if not self.ros_node.ready(): #ros_node.last_odom == None: #or self.last_vel == None:
+            rospy.loginfo("Waiting for rospy node to become ready.")
             return 0
 
-        actual_x = self.ros_node.last_odom.linear.x
-        actual_z = self.ros_node.last_odom.angular.z
+        actual_x = self.ros_node.getLinearSpeed() #last_odom.linear.x
+        actual_z = self.ros_node.getAngularSpeed() #last_odom.angular.z
 
         target_x = self.target_x
         target_z = self.target_z
@@ -147,8 +154,8 @@ class RobotEnv(rl.core.Env):
         return math.sqrt(pow(x1-x2, 2) + pow(y1-y2, 2) )
 
     def printDebugInfos(self, event):
-        rospy.loginfo("L target: %.2f     A target: %.2f   O-Target dist: %.2f     A-target dist: %.2f   Reward: %.2f       L: %.2f    R: %.2f ", 
-            self.target_x, self.target_z, self.origo_target_dist, self.actual_target_dist, self.reward, self.ros_node.wheel_current_l, self.ros_node.wheel_current_r)
+        rospy.loginfo("Linear: %.2f - %.2f     Angular: %.2f - %.2f   O-Target dist: %.2f     A-target dist: %.2f   Reward: %.2f       L: %.2f    R: %.2f ", 
+            self.target_x, self.ros_node.getLinearSpeed(), self.target_z, self.ros_node.getAngularSpeed(), self.origo_target_dist, self.actual_target_dist, self.reward, self.current_left, self.current_right)
 
     def scale(self, min, max, value):
         if value > max:
@@ -195,7 +202,7 @@ class RobotEnv(rl.core.Env):
         if action == 12: 
             self.current_right -= inc * 2
 
-        print("{0:2d}".format(action), end=" ")
+        #print("{0:2d}".format(action), end=" ")
 
         self.ros_node.sendCurrent(self.current_left, self.current_right)
 
@@ -237,9 +244,9 @@ class Trainer(object):
         # slows down training quite a lot. You can always safely abort the training prematurely using
         # Ctrl + C.
 
-        for i in range(1000):
+        for i in range(1000000):
             history_callback = agent.fit(env, nb_steps=100, visualize=True, verbose=0)
-            self.history = history_callback.history["loss"]
+            #self.history = history_callback.history["loss"]
             agent.save_weights('qlearning_weights.h5f', overwrite=True)
             #self.saveLossHistory()
 

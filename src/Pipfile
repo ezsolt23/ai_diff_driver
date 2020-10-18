@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 slackclient = "*"
 keras = "*"
+np = "*"
+keras-rl2 = "*"
 
 [requires]
 python_version = "3.6"

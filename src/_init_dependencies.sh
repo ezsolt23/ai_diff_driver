@@ -1,5 +1,9 @@
 #!/bin/bash
 
+python3 -m vent ./venv
+
+pip3 install slacklient tensorflow keras keras-rl
+
 python_bin=`pipenv --venv`
 
 echo $python_bin
