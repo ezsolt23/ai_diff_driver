@@ -37,7 +37,7 @@ match your specific wheel. It should be refactored to an external repository, bu
 
 # Special Thanks
 
-I have written this project as an honor to my father Zoltán Egri. We started our first robot project together back in 2002
-and he was alway a great colleague, excellent problem solver and a loving father. Unfortunately he passed away in May 04 2020
+I have written this project in memory of my father, Zoltán Egri. We started our first robot project together back in 2002
+and he was alway a great colleague, excellent designer and engeenier and a loving father. Unfortunately he passed away in May 04 2020
 so he could never see the finished project. I have written and open sourced this project as a honor to my loving father. 
 I love you dad! Rest in peace!
