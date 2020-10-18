@@ -12,3 +12,5 @@ site
 src/venv
 */__pycache__
 Pipfile.lock
+checkpoint
+*weights.hf5.*
