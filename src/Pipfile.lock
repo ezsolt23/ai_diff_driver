@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "998fd1a94be3ef185e94dd737efbb6a39b8bf5687f29f3d99db34f2aafbc98b8"
+            "sha256": "dfb72054acb7c2303d4fd64c40453410743984a6b9bb65e78099c546a3cdf5e5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -73,6 +73,13 @@
             "markers": "python_version ~= '3.5'",
             "version": "==4.1.1"
         },
+        "catkin-pkg": {
+            "hashes": [
+                "sha256:28ee181cca827c0aabf9397351f58a97e1475ca5ac7c106a5916e3ee191cd3d0",
+                "sha256:fbfb107e7e7f3167175b6a68bd51eee7d5a85b2e18c4dbee96d715178f029d8c"
+            ],
+            "version": "==0.4.23"
+        },
         "certifi": {
             "hashes": [
                 "sha256:5930595817496dd21bb8dc35dad090f1c2cd0adfaf21204bf6732ca5d8ee34d3",
@@ -86,6 +93,21 @@
                 "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
             ],
             "version": "==3.0.4"
+        },
+        "distro": {
+            "hashes": [
+                "sha256:0e58756ae38fbd8fc3020d54badb8eae17c5b9dcbed388b17bb55b8a5928df92",
+                "sha256:df74eed763e18d10d0da624258524ae80486432cd17392d9c3d96f5e83cd2799"
+            ],
+            "version": "==1.5.0"
+        },
+        "docutils": {
+            "hashes": [
+                "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af",
+                "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
+            "version": "==0.16"
         },
         "gast": {
             "hashes": [
@@ -381,6 +403,22 @@
             ],
             "version": "==0.2.8"
         },
+        "pyparsing": {
+            "hashes": [
+                "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1",
+                "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"
+            ],
+            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==2.4.7"
+        },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c",
+                "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==2.8.1"
+        },
         "pyyaml": {
             "hashes": [
                 "sha256:06a0d7ba600ce0b2d2fe2e78453a470b5a6e000a985dd4a4e54e436cc36b0e97",
@@ -412,6 +450,14 @@
                 "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"
             ],
             "version": "==1.3.0"
+        },
+        "rospkg": {
+            "hashes": [
+                "sha256:61dc65c5575fe5fe8061fe1064f439fe64a17af6dcad42efefbe4ca0490661cc",
+                "sha256:f0db1a4ed29ff12174a673376080bbaaf52024d3982993570b8a13b3862c8709"
+            ],
+            "index": "pypi",
+            "version": "==1.2.8"
         },
         "rsa": {
             "hashes": [

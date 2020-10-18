@@ -1,4 +1,3 @@
-#!./venv/bin/python3
 # -*- coding: utf-8 -*-
 """AI wheel driver node"""
 

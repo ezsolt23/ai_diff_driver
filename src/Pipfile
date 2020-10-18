@@ -10,6 +10,7 @@ slackclient = "*"
 keras = "*"
 np = "*"
 keras-rl2 = "*"
+rospkg = "*"
 
 [requires]
 python_version = "3.6"
