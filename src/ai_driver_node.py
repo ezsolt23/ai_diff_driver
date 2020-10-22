@@ -28,6 +28,9 @@ class AiDriverNode(object):
         self.pub_wheel_current_l = rospy.Publisher("cmd_wheel_current_l", Float32, queue_size=10)
         self.pub_wheel_current_r = rospy.Publisher("cmd_wheel_current_r", Float32, queue_size=10)
 
+    def ready(self):
+        return True
+
     def vel_callback(self, vel):
         """Handle subscriber data."""
         # Simply print out values in our custom message.

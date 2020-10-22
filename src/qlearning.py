@@ -17,6 +17,7 @@ import time
 import random
 import csv
 import math
+import exceptions
 
 class RobotEnv(rl.core.Env):
 
@@ -109,17 +110,40 @@ class RobotEnv(rl.core.Env):
             print("Res: ", self.scale(-1,0,-1.5))
 
             rospy.loginfo("Waiting for odom to become available..")
-            time.sleep(1)    
-        data =  [
-            self.scale(-1, 1, self.ros_node.getLinearSpeed()),  #last_odom.linear.x), 
-            self.scale(-1, 1, self.ros_node.getAngularSpeed()), #last_odom.angular.z),
-            self.scale(-1, 1, self.target_x),
-            self.scale(-1, 1, self.target_z),
-            self.scale(-5, 5, self.ros_node.wheel_current_l),
-            self.scale(-5, 5, self.ros_node.wheel_current_r)
-            ]
+            time.sleep(1)
+
+        data = np.concatenate((
+            self.floatToVect(-1, 1, self.ros_node.getLinearSpeed(), 0.1),  #last_odom.linear.x),
+            self.floatToVect(-1, 1, self.ros_node.getAngularSpeed(), 0.1), #last_odom.angular.z),
+            self.floatToVect(-1, 1, self.target_x,0.1),
+            self.floatToVect(-1, 1, self.target_z,0.1),
+            self.floatToVect(-5, 5, self.ros_node.wheel_current_l,0.5),
+            self.floatToVect(-5, 5, self.ros_node.wheel_current_r,0.5)
+        ))
+
         state = np.array([data])
+
+        #print(state)
+        #print(state.shape)
         return state
+
+    def floatToVect(self, min, max, value, steps):
+        if value < min:
+            value = min
+        if value > max:
+            value = max
+
+        #if value < min or value > max:
+        #    error = exceptions.Error("Index out of range. min: %.2f max %.2f value: %.2f", min, max, value)
+        #    raise error
+
+        nb_ranges = round((max - min) // steps)
+        result = np.zeros(nb_ranges)
+
+        index = round((value - min) // steps)-1
+        result[index] = 1
+        return result
+
 
     def calcReward(self):
         if not self.ros_node.ready(): #ros_node.last_odom == None: #or self.last_vel == None:
@@ -213,7 +237,7 @@ class Trainer(object):
         env = RobotEnv(ros_node)
 
         nb_actions = 13
-        input_size = 6
+        input_size = 116
 
         model = Sequential()
         model.add(Flatten(input_shape=(1,1,input_size,)))
@@ -238,7 +262,7 @@ class Trainer(object):
         #            target_model_update=1e-2, policy=policy)
 
         agent.compile(Adam(lr=1e-3), metrics=['mae'])
-        #agent.load_weights('qlearning_weights.h5f')
+        agent.load_weights('qlearning_weights.h5f')
 
         # Okay, now it's time to learn something! We visualize the training here for show, but this
         # slows down training quite a lot. You can always safely abort the training prematurely using
