@@ -1,3 +1,6 @@
+import sys
+from pprint import pprint
+
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -15,7 +18,7 @@ env = RobotEnv(ros_node)
 eps = np.finfo(np.float32).eps.item()
 
 """
-## Implement Actor Critic network
+# Implement Actor Critic network
 This network learns two functions:
 1. Actor: This takes as input the state of our environment and returns a
 probability value for each action in its action space.
@@ -24,19 +27,20 @@ an estimate of total rewards in the future.
 In our implementation, they share the initial layer.
 """
 
-num_inputs = 4
-num_actions = 12
+num_inputs = 116
+num_actions = 13
 num_hidden1 = 128
 
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden1, activation="relu")(inputs)
-action = layers.Dense(num_actions, activation="softmax")(common)
-critic = layers.Dense(1)(common)
+common2 = layers.Dense(num_hidden1, activation="relu")(common)
+action = layers.Dense(num_actions, activation="softmax")(common2)
+critic = layers.Dense(1)(common2)
 
 model = keras.Model(inputs=inputs, outputs=[action, critic])
 
 """
-## Train
+# Train
 """
 
 optimizer = keras.optimizers.Adam(learning_rate=0.01)
@@ -64,6 +68,11 @@ while True:  # Run until solved
             critic_value_history.append(critic_value[0, 0])
 
             # Sample action from action probability distribution
+            #print("Action probs:")
+            # print(action_probs)
+            #tf.print(action_probs, output_stream=sys.stdout)
+            # print("End")
+
             action = np.random.choice(num_actions, p=np.squeeze(action_probs))
             action_probs_history.append(tf.math.log(action_probs[0, action]))
 

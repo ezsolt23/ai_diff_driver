@@ -8,10 +8,6 @@ import time
 import timeit
 
 import numpy as np
-import rl.core
-from rl.agents.dqn import DQNAgent
-from rl.memory import SequentialMemory
-from rl.policy import BoltzmannQPolicy
 from tensorflow.keras.layers import Activation, Dense, Flatten, Input
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
@@ -19,7 +15,7 @@ from tensorflow.keras.optimizers import Adam
 import exceptions
 
 
-class RobotEnv(rl.core.Env):
+class RobotEnv(object):
 
     current_left = 0.0
     current_right = 0.0
@@ -30,6 +26,8 @@ class RobotEnv(rl.core.Env):
     time_penalty = 0
     steps = 0
     sum_reward = 0.0
+    target_x = 0.0
+    target_z = 0.0
 
     def __init__(self, ros_node):
         self.ros_node = ros_node
@@ -39,6 +37,10 @@ class RobotEnv(rl.core.Env):
         self.calcReward()
 
         #rospy.Timer(rospy.Duration(1.0), self.printDebugInfos)
+
+    def setTarget(self, x, z):
+        self.target_x = x
+        self.target_z = z
 
     def step(self, action):
         """Run one timestep of the environment's dynamics.
@@ -60,6 +62,9 @@ class RobotEnv(rl.core.Env):
             done = True
 
         self.time_penalty -= 0.001
+        if self.ros_node.getLinearSpeed() == 0:
+            self.time_penalty -= 0.01
+
         reward = self.getReward()
         self.sum_reward += reward
 
@@ -73,9 +78,16 @@ class RobotEnv(rl.core.Env):
         # Returns/home/ezsolt/.ros/rtabmap.db
             observation (object): The initial observation of the space. Initial reward is assumed to be 0.
         """
-        print(
-            "          ----------           RESET   %.2f", self.sum_reward)
 
+        previous_reward = self.reward
+        previous_speed = self.ros_node.getLinearSpeed()
+        previous_x = self.target_x
+        previous_z = self.target_z
+
+        print("Prev reward: %.2f\tX: %.2f\tZ: %.2f\tX speed: %.2f" %
+              (previous_reward, previous_x, previous_z, previous_speed))
+
+        self.ros_node.reset()
         self.sum_reward = 0
         self.reward = 0
         self.steps = 0
@@ -88,9 +100,11 @@ class RobotEnv(rl.core.Env):
 
         # Set up new random target speed
         # self.ros_node.last_vel.linear.x
-        self.target_x = random.uniform(-0.5, 0.5)
+        self.target_x = random.uniform(0.3, 1.0)
+        self.target_x *= random.choice([-1, 1])
         # self.ros_node.last_vel.angular.z
-        self.target_z = random.uniform(-0.5, 0.5)
+        self.target_z = 0
+        #self.target_z = random.uniform(-0.5, 0.5)
 
         if abs(self.target_x) < 0.15:
             self.target_x = 0.0
@@ -105,7 +119,7 @@ class RobotEnv(rl.core.Env):
     def getReward(self):
         reward = self.calcReward()
         self.reward = reward + self.time_penalty
-        return reward
+        return self.reward
 
     def getObservation(self):
         while not self.ros_node.ready():
@@ -125,7 +139,7 @@ class RobotEnv(rl.core.Env):
             self.floatToVect(-5, 5, self.ros_node.wheel_current_r, 0.5)
         ))
 
-        state = np.array([data])
+        state = np.array(data)
 
         # print(state)
         # print(state.shape)
@@ -201,7 +215,7 @@ class RobotEnv(rl.core.Env):
 
     def sendWheelsCurrent(self, action):
         # sendCurrent (left, right)
-        inc = 0.3
+        inc = 0.1
         if action == 1:
             self.current_left += inc
         if action == 2:

@@ -9,8 +9,8 @@ verify_ssl = true
 slackclient = "*"
 keras = "*"
 np = "*"
-keras-rl2 = "*"
 rospkg = "*"
+tensorflow = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3"
