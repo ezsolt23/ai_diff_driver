@@ -57,16 +57,27 @@ class RobotEnv(object):
         self.steps += 1
         self.sendWheelsCurrent(action)
         # self.rate.sleep()
-        done = False
-        if self.steps == 50:
-            done = True
 
         self.time_penalty -= 0.001
         if self.ros_node.getLinearSpeed() == 0:
-            self.time_penalty -= 0.01
+            self.time_penalty -= 0.1
 
         reward = self.getReward()
         self.sum_reward += reward
+
+        done = False
+        if self.actual_target_dist > self.origo_target_dist * 1.1:
+            self.reward = -200
+            reward = self.reward
+            done = True
+
+        if self.target_z == 0 and abs(self.ros_node.getAngularSpeed()) > 1.0:
+            self.reward = -200
+            reward = self.reward
+            done = True
+
+        if self.ros_node.getLinearSpeed() > 0:
+            reward += 1
 
         observation = self.getObservation()
         info = {}
@@ -84,8 +95,8 @@ class RobotEnv(object):
         previous_x = self.target_x
         previous_z = self.target_z
 
-        print("Prev reward: %.2f\tX: %.2f\tZ: %.2f\tX speed: %.2f" %
-              (previous_reward, previous_x, previous_z, previous_speed))
+        print("Reward: %.2f\tX: %.2f\tZ: %.2f\tX speed: %.2f Z speed:%.2f" %
+              (previous_reward, previous_x, previous_z, previous_speed, self.ros_node.getAngularSpeed()))
 
         self.ros_node.reset()
         self.sum_reward = 0
@@ -100,8 +111,9 @@ class RobotEnv(object):
 
         # Set up new random target speed
         # self.ros_node.last_vel.linear.x
-        self.target_x = random.uniform(0.3, 1.0)
-        self.target_x *= random.choice([-1, 1])
+        #self.target_x = random.uniform(0.3, 1.0)
+        #self.target_x *= random.choice([-1, 1])
+        self.target_x = 1.0
         # self.ros_node.last_vel.angular.z
         self.target_z = 0
         #self.target_z = random.uniform(-0.5, 0.5)
@@ -113,11 +125,12 @@ class RobotEnv(object):
             self.target_z = 0.0
 
         observation = self.getObservation()
-        reward = self.getReward()
+        reward = self.reward
         return observation
 
     def getReward(self):
         reward = self.calcReward()
+        #self.reward = self.scale(-24, 1, reward + self.time_penalty)
         self.reward = reward + self.time_penalty
         return self.reward
 
@@ -128,16 +141,29 @@ class RobotEnv(object):
             print("Waiting for odom to become available..")
             time.sleep(1)
 
-        data = np.concatenate((
-            # last_odom.linear.x),
-            self.floatToVect(-1, 1, self.ros_node.getLinearSpeed(), 0.1),
-            # last_odom.angular.z),
-            self.floatToVect(-1, 1, self.ros_node.getAngularSpeed(), 0.1),
-            self.floatToVect(-1, 1, self.target_x, 0.1),
-            self.floatToVect(-1, 1, self.target_z, 0.1),
-            self.floatToVect(-5, 5, self.ros_node.wheel_current_l, 0.5),
-            self.floatToVect(-5, 5, self.ros_node.wheel_current_r, 0.5)
-        ))
+        data = [
+            self.ros_node.averages[0][0],
+            self.ros_node.averages[0][1],
+
+            self.ros_node.averages[1][0],
+            self.ros_node.averages[1][1],
+
+            self.ros_node.averages[2][0],
+            self.ros_node.averages[2][1],
+
+            self.ros_node.averages[3][0],
+            self.ros_node.averages[3][1],
+
+            self.ros_node.averages[4][0],
+            self.ros_node.averages[4][1],
+
+            self.ros_node.getLinearSpeed(),
+            self.ros_node.getAngularSpeed(),
+            self.target_x,
+            self.target_z,
+            self.ros_node.wheel_current_l,
+            self.ros_node.wheel_current_r
+        ]
 
         state = np.array(data)
 
@@ -187,11 +213,11 @@ class RobotEnv(object):
             return 1
 
         if actual_target_dist > origo_target_dist:
-            return -1 * self.scale(0, 2, actual_target_dist)
+            return -1 * abs(actual_target_dist)
 
         penalty = actual_target_dist/origo_target_dist
 
-        return self.scale(-1, 0, -penalty)
+        return 1-penalty
 
     def distance(self, x1, y1, x2, y2):
         return math.sqrt(pow(x1-x2, 2) + pow(y1-y2, 2))
@@ -204,18 +230,20 @@ class RobotEnv(object):
         if value > max:
             return 1
         if value < min:
-            return 0
-        return (value - min) / (max - min)
+            return -1
+        return (1 - ((value - min) / (max - min)) * 2)
 
     def render(self, mode='human', close=False):
-        print(".", end="")
+        print("", end="")
 
     def close(self):
         print("Close")
 
     def sendWheelsCurrent(self, action):
         # sendCurrent (left, right)
-        inc = 0.1
+        inc = 0.3
+        if action == 0:
+            self.current_left += inc
         if action == 1:
             self.current_left += inc
         if action == 2:

@@ -14,7 +14,7 @@ class RosDriverSimulator(object):
     wheel_current_r = 0.0
     current_l_avg = 0.0
     current_r_avg = 0.0
-    averages = []
+    averages = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
 
     def __init__(self):
         self.x = 0.0
@@ -32,9 +32,11 @@ class RosDriverSimulator(object):
     def reset(self):
         self.x = 0.0
         self.z = 0.0
-        self.averages.clear()
+        # self.averages.clear()
         self.current_l_avg = 0
         self.current_r_avg = 0
+        for i in range(5):
+            self.averages[i] = [0.0, 0.0]
 
     def sendCurrent(self, current_left, current_right):
         self.wheel_current_l = current_left
@@ -74,11 +76,15 @@ class RosDriverSimulator(object):
         tyre_circumference = 0.67   # m
         wheel_track = 0.35   # m
 
-        if (l - r) != 0:
-            s = tyre_circumference * (l+r) / ((r - l) * 2.0)
-        else:
+        s = 0.0
+        if (l - r) == 0.0:
             s = l * tyre_circumference
+            #print("s1:", s)
 
-        w = tyre_circumference * ((r-l) / wheel_track) * 0.1
+        if (l > 0 and r > 0) or (l < 0 and r < 0):
+            s = tyre_circumference * (l+r) / 2.0
+            #print("s2:", s)
+
+        w = tyre_circumference * ((r-l) / wheel_track)
         self.x = s
         self.z = w

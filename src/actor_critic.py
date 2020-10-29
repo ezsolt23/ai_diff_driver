@@ -11,7 +11,7 @@ from ros_driver_simulator import RosDriverSimulator
 
 # Configuration parameters for the whole setup
 gamma = 0.99  # Discount factor for past rewards
-max_steps_per_episode = 500
+max_steps_per_episode = 100
 ros_node = RosDriverSimulator()
 env = RobotEnv(ros_node)
 # Smallest number such that 1.0 + eps != 1.0
@@ -27,7 +27,7 @@ an estimate of total rewards in the future.
 In our implementation, they share the initial layer.
 """
 
-num_inputs = 116
+num_inputs = 16
 num_actions = 13
 num_hidden1 = 128
 

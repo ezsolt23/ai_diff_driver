@@ -26,3 +26,34 @@ for i in range(4):
 
 for i in range(10):
     step(0)  # incrrease l and r
+
+
+env.reset()
+env.setTarget(0.3, 0)
+
+for i in range(8):
+    step(3)  # incrrease l and r
+
+step(1)  # left +1
+
+for i in range(4):
+    step(6)  # decrease l and r
+
+step(2)  # right +1
+
+for i in range(4):
+    step(3)  # incrrease l and r
+
+step(2)  # right +1
+
+for i in range(10):
+    step(0)  # incrrease l and r
+
+env.reset()
+env.setTarget(-0.3, 0)
+
+for i in range(8):
+    step(6)  # decrement l and r
+
+for i in range(4):
+    step(3)  # incrrease l and r
