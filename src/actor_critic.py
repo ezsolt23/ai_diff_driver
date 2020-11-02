@@ -27,15 +27,16 @@ an estimate of total rewards in the future.
 In our implementation, they share the initial layer.
 """
 
-num_inputs = 16
+num_inputs = 6
 num_actions = 13
 num_hidden1 = 128
 
 inputs = layers.Input(shape=(num_inputs,))
 common = layers.Dense(num_hidden1, activation="relu")(inputs)
 common2 = layers.Dense(num_hidden1, activation="relu")(common)
-action = layers.Dense(num_actions, activation="softmax")(common2)
-critic = layers.Dense(1)(common2)
+common3 = layers.Dense(num_hidden1, activation="relu")(common2)
+action = layers.Dense(num_actions, activation="softmax")(common3)
+critic = layers.Dense(1)(common3)
 
 model = keras.Model(inputs=inputs, outputs=[action, critic])
 
@@ -43,7 +44,7 @@ model = keras.Model(inputs=inputs, outputs=[action, critic])
 # Train
 """
 
-optimizer = keras.optimizers.Adam(learning_rate=0.01)
+optimizer = keras.optimizers.Adam(learning_rate=0.004)
 huber_loss = keras.losses.Huber()
 action_probs_history = []
 critic_value_history = []
@@ -137,6 +138,11 @@ while True:  # Run until solved
         template = "running reward: {:.2f} at episode {}"
         print(template.format(running_reward, episode_count))
 
-    if running_reward > 195:  # Condition to consider the task solved
+    if episode_count % 1000 == 0:
+        model.save_weights('saved-models/a2c-model-1-' +
+                           str(episode_count) + '.h5',
+                           overwrite=True)
+
+    if running_reward > 1000:  # Condition to consider the task solved
         print("Solved at episode {}!".format(episode_count))
         break

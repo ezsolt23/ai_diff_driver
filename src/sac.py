@@ -1,47 +1,56 @@
 
-import time
-
-import sac_actor
 from robot_env import RobotEnv
 from ros_driver_simulator import RosDriverSimulator
-from sac_agent import Agent
+from sac_sac import *
 
-alpha = 0.01
-tau = 0.01
-batchsize = 64
-
-# Environment
 ros_node = RosDriverSimulator()
 env = RobotEnv(ros_node)
-input_dim = 16
-output_dim = 13
 
-# Agent
-lr, gamma = 3*10**-4, 0.99
-clipnorm, verbose = False, False
-agent = Agent(input_dim, output_dim, lr, gamma, tau, alpha, clipnorm, verbose)
-agent.memory_size = batchsize
-agent.batchsize = batchsize
+network_params = {
+    'hidden_sizes': [64, 64],
+    'activation': 'relu',
+    'policy': kl_policy
+}
 
-# Train
-EPISODES = 10**4
-scores = []
-t1 = time.time()
-for e in range(1, EPISODES+1):
-    state = env.reset()
-    state = agent.make_tensor(state)
-    reward_sum = 0
-    done = False
-    while not done:
+rl_params = {
+    # env params
+    # 'env_name':'FrozenLake-v0',
+    # 'env_name': 'CartPole-v1',
+    # 'env_name':'Taxi-v2',
+    # 'env_name':'MountainCar-v0',
+    # 'env_name':'Acrobot-v1',
+    # 'env_name':'LunarLander-v2',
 
-        # Do main step
-        # env.render()
-        action = agent.act(state)
-        next_state, reward, done, _ = env.step(action)
-        reward_sum += reward
-        next_state = agent.make_tensor(next_state)
-        # want to remember state as a vec
-        agent.remember(state[0], action, reward, next_state[0], done)
-        state = next_state
-        if e >= 2:
-            agent.learn()
+    # control params
+    'seed': int(1),
+    'epochs': int(50),
+    'steps_per_epoch': 2000,
+    'replay_size': 100000,
+    'batch_size': 256,
+    'start_steps': 4000,
+    'max_ep_len': 500,
+    'save_freq': 5,
+    'render': False,
+
+    # rl params
+    'gamma': 0.99,
+    'polyak': 0.995,
+    'lr': 0.0003,
+    'state_hist_n': 1,
+    'grad_clip_val': None,
+
+    # entropy params
+    'alpha': 'auto',
+    'target_entropy_start': 0.3,  # proportion of max_entropy
+    'target_entropy_stop': 0.3,
+    'target_entropy_steps': 1e5,
+}
+
+saved_model_dir = './saved_models'
+logger_kwargs = setup_logger_kwargs(
+    exp_name='sac_discrete_' + rl_params['env_name'], seed=rl_params['seed'], data_dir=saved_model_dir, datestamp=False)
+
+sac(lambda: env, actor_critic=mlp_actor_critic,
+    logger_kwargs=logger_kwargs,
+    network_params=network_params,
+    rl_params=rl_params)

@@ -11,6 +11,8 @@ keras = "*"
 np = "*"
 rospkg = "*"
 tensorflow = "*"
+gym = "*"
+torch = "*"
 
 [requires]
 python_version = "3"

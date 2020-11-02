@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """AI wheel driver node simulator for offline training"""
 
+import random
+
 import numpy as np
 
 
@@ -30,13 +32,18 @@ class RosDriverSimulator(object):
         return True
 
     def reset(self):
-        self.x = 0.0
-        self.z = 0.0
+        # self.x = random.uniform(-1, 1)  # 0.0
+        # self.z = random.uniform(-1, 1)  # 0.0
         # self.averages.clear()
-        self.current_l_avg = 0
-        self.current_r_avg = 0
+        #self.current_l_avg = 0
+        #self.current_r_avg = 0
+        self.wheel_current_l = random.uniform(-2.0, 2.0)
+        self.wheel_current_r = random.uniform(-2.0, 2.0)
         for i in range(5):
-            self.averages[i] = [0.0, 0.0]
+            self.averages[i] = [
+                random.uniform(-2.0, 2.0), random.uniform(-2.0, 2.0)]
+        self.calcAverages()
+        self.calcVelocities()
 
     def sendCurrent(self, current_left, current_right):
         self.wheel_current_l = current_left

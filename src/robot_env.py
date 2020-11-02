@@ -66,18 +66,17 @@ class RobotEnv(object):
         self.sum_reward += reward
 
         done = False
-        if self.actual_target_dist > self.origo_target_dist * 1.1:
-            self.reward = -200
-            reward = self.reward
-            done = True
+        if self.steps > 15:
+            if self.actual_target_dist > self.origo_target_dist * 1.1:
+                self.reward = -100 - \
+                    (self.actual_target_dist-self.origo_target_dist)
+                reward = self.reward
+                done = True
 
-        if self.target_z == 0 and abs(self.ros_node.getAngularSpeed()) > 1.0:
-            self.reward = -200
-            reward = self.reward
-            done = True
-
-        if self.ros_node.getLinearSpeed() > 0:
-            reward += 1
+            if self.target_z == 0 and abs(self.ros_node.getAngularSpeed()) > 1.0:
+                self.reward = -100 - abs(self.ros_node.getAngularSpeed())
+                reward = self.reward
+                done = True
 
         observation = self.getObservation()
         info = {}
@@ -103,29 +102,29 @@ class RobotEnv(object):
         self.reward = 0
         self.steps = 0
         self.time_penalty = 0
-        self.current_left = 0
-        self.current_right = 0
-        self.sendWheelsCurrent(0)
+        self.current_left = self.ros_node.current_l_avg
+        self.current_right = self.ros_node.current_r_avg
+        # self.sendWheelsCurrent(0)
         # time.sleep(2)
-        self.start_time = timeit.default_timer()
+        #self.start_time = timeit.default_timer()
 
         # Set up new random target speed
         # self.ros_node.last_vel.linear.x
-        #self.target_x = random.uniform(0.3, 1.0)
+        self.target_x = random.uniform(-1.5, 1.5)
         #self.target_x *= random.choice([-1, 1])
-        self.target_x = 1.0
+        #self.target_x = 1.0
         # self.ros_node.last_vel.angular.z
-        self.target_z = 0
-        #self.target_z = random.uniform(-0.5, 0.5)
+        #self.target_z = 0
+        self.target_z = random.uniform(-0.5, 0.5)
 
-        if abs(self.target_x) < 0.15:
+        if abs(self.target_x) < 0.5:
             self.target_x = 0.0
 
         if abs(self.target_z < 0.15):
             self.target_z = 0.0
 
         observation = self.getObservation()
-        reward = self.reward
+        reward = self.getReward()
         return observation
 
     def getReward(self):
@@ -142,20 +141,21 @@ class RobotEnv(object):
             time.sleep(1)
 
         data = [
-            self.ros_node.averages[0][0],
-            self.ros_node.averages[0][1],
+            # self.ros_node.averages[0][0],
+            # self.ros_node.averages[0][1],
 
-            self.ros_node.averages[1][0],
-            self.ros_node.averages[1][1],
+            # self.ros_node.averages[1][0],
+            # self.ros_node.averages[1][1],
 
-            self.ros_node.averages[2][0],
-            self.ros_node.averages[2][1],
+            # self.ros_node.averages[2][0],
+            # self.ros_node.averages[2][1],
 
-            self.ros_node.averages[3][0],
-            self.ros_node.averages[3][1],
+            # self.ros_node.averages[3][0],
+            # self.ros_node.averages[3][1],
 
-            self.ros_node.averages[4][0],
-            self.ros_node.averages[4][1],
+            #
+            # self.ros_node.averages[4][0],
+            # self.ros_node.averages[4][1],
 
             self.ros_node.getLinearSpeed(),
             self.ros_node.getAngularSpeed(),
@@ -210,14 +210,14 @@ class RobotEnv(object):
         #    return -1
 
         if origo_target_dist == 0 and actual_target_dist < 0.05:
-            return 1
+            return 20
 
         if actual_target_dist > origo_target_dist:
-            return -1 * abs(actual_target_dist)
+            return -1 * abs(actual_target_dist)*20
 
         penalty = actual_target_dist/origo_target_dist
 
-        return 1-penalty
+        return 20-penalty*20
 
     def distance(self, x1, y1, x2, y2):
         return math.sqrt(pow(x1-x2, 2) + pow(y1-y2, 2))
